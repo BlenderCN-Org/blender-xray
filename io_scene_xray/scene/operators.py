@@ -12,7 +12,7 @@ class OpExportLevelScene(bpy.types.Operator, io_utils.ExportHelper):
 
     filename_ext = '.level'
 
-    filter_glob = bpy.props.StringProperty(
+    filter_glob : bpy.props.StringProperty(
         default='*'+filename_ext, options={'HIDDEN'}
         )
 
@@ -52,5 +52,5 @@ def register_operators():
 
 
 def unregister_operators():
-    bpy.types.INFO_MT_file_export.remove(menu_func_export)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     bpy.utils.unregister_class(OpExportLevelScene)

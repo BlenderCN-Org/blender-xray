@@ -14,8 +14,8 @@ class OpImportERR(TestReadyOperator, io_utils.ImportHelper):
     bl_description = 'Imports X-Ray Error List (.err)'
     bl_options = {'REGISTER', 'UNDO'}
 
-    filepath = bpy.props.StringProperty(subtype="FILE_PATH")
-    filter_glob = bpy.props.StringProperty(default='*.err', options={'HIDDEN'})
+    filepath : bpy.props.StringProperty(subtype="FILE_PATH")
+    filter_glob : bpy.props.StringProperty(default='*.err', options={'HIDDEN'})
 
     def execute(self, context):
         imp.import_file(self.filepath, self)

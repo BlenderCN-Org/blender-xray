@@ -9,7 +9,7 @@ class TestAddon(utils.XRayTestCase):
         self.assertIsNotNone(io_scene_xray.bl_info)
 
     def test_enabled(self):
-        self.assertIn('io_scene_xray', bpy.context.user_preferences.addons)
+        self.assertIn('io_scene_xray', bpy.context.preferences.addons)
 
     def test_registry_register_bad_thing(self):
         from io_scene_xray import registry

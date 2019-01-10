@@ -16,29 +16,29 @@ class OpImportDM(bpy.types.Operator, io_utils.ImportHelper):
     bl_description = 'Imports X-Ray Detail Model (.dm, .details)'
     bl_options = {'REGISTER', 'PRESET', 'UNDO'}
 
-    filter_glob = bpy.props.StringProperty(
+    filter_glob : bpy.props.StringProperty(
         default='*.dm;*.details', options={'HIDDEN'}
         )
 
-    directory = bpy.props.StringProperty(
+    directory : bpy.props.StringProperty(
         subtype="DIR_PATH", options={'SKIP_SAVE'}
         )
 
-    filepath = bpy.props.StringProperty(
+    filepath : bpy.props.StringProperty(
         subtype="FILE_PATH", options={'SKIP_SAVE'}
         )
 
-    files = bpy.props.CollectionProperty(
+    files : bpy.props.CollectionProperty(
         type=bpy.types.OperatorFileListElement, options={'SKIP_SAVE'}
         )
 
-    details_models_in_a_row = bpy.props.BoolProperty(
+    details_models_in_a_row : bpy.props.BoolProperty(
         name='Details Models in a Row', default=True
         )
 
-    load_slots = bpy.props.BoolProperty(name='Load Slots', default=True)
+    load_slots : bpy.props.BoolProperty(name='Load Slots', default=True)
 
-    format = bpy.props.EnumProperty(
+    format : bpy.props.EnumProperty(
         name='Details Format',
         items=(
             ('builds_1096-1230', 'Builds 1096-1230', ''),
@@ -128,11 +128,10 @@ class OpExportDMs(bpy.types.Operator):
     bl_idname = 'xray_export.dms'
     bl_label = 'Export .dm'
 
-    detail_models = bpy.props.StringProperty(options={'HIDDEN'})
-    directory = bpy.props.StringProperty(subtype="FILE_PATH")
+    detail_models : bpy.props.StringProperty(options={'HIDDEN'})
+    directory : bpy.props.StringProperty(subtype="FILE_PATH")
 
-    texture_name_from_image_path = \
-        plugin_prefs.PropObjectTextureNamesFromPath()
+    texture_name_from_image_path : plugin_prefs.PropObjectTextureNamesFromPath()
 
     def execute(self, context):
         try:
@@ -181,14 +180,13 @@ class OpExportDM(bpy.types.Operator, io_utils.ExportHelper):
     bl_label = 'Export .dm'
 
     filename_ext = '.dm'
-    detail_model = bpy.props.StringProperty(options={'HIDDEN'})
+    detail_model : bpy.props.StringProperty(options={'HIDDEN'})
 
-    filter_glob = bpy.props.StringProperty(
+    filter_glob : bpy.props.StringProperty(
         default='*'+filename_ext, options={'HIDDEN'}
         )
 
-    texture_name_from_image_path = \
-        plugin_prefs.PropObjectTextureNamesFromPath()
+    texture_name_from_image_path : plugin_prefs.PropObjectTextureNamesFromPath()
 
     def execute(self, context):
         try:
@@ -242,14 +240,13 @@ class OpExportLevelDetails(bpy.types.Operator, io_utils.ExportHelper):
 
     filename_ext = '.details'
 
-    filter_glob = bpy.props.StringProperty(
+    filter_glob : bpy.props.StringProperty(
         default='*'+filename_ext, options={'HIDDEN'}
         )
 
-    texture_name_from_image_path = \
-        plugin_prefs.PropObjectTextureNamesFromPath()
+    texture_name_from_image_path : plugin_prefs.PropObjectTextureNamesFromPath()
 
-    format_version = bpy.props.EnumProperty(
+    format_version : bpy.props.EnumProperty(
         name='Format',
         items=(
             ('builds_1569-cop', 'Builds 1569-CoP', ''),
@@ -372,8 +369,8 @@ def register_operators():
 
 def unregister_operators():
     bpy.utils.unregister_class(PackDetailsImages)
-    bpy.types.INFO_MT_file_export.remove(menu_func_export)
-    bpy.types.INFO_MT_file_import.remove(menu_func_import)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.utils.unregister_class(OpExportLevelDetails)
     bpy.utils.unregister_class(OpExportDMs)
     bpy.utils.unregister_class(OpExportDM)

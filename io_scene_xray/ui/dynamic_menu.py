@@ -7,8 +7,8 @@ class _DynamicMenuOp(bpy.types.Operator):
     bl_idname = 'io_scene_xray.dynmenu'
     bl_label = ''
 
-    prop = bpy.props.StringProperty()
-    value = bpy.props.StringProperty()
+    prop : bpy.props.StringProperty()
+    value : bpy.props.StringProperty()
 
     def execute(self, context):
         data = getattr(context, _DynamicMenuOp.bl_idname + '.data')

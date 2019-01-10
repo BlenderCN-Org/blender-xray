@@ -7,9 +7,9 @@ class _ListOp(bpy.types.Operator):
     bl_idname = 'io_scene_xray.list'
     bl_label = ''
 
-    operation = bpy.props.StringProperty()
-    collection = bpy.props.StringProperty()
-    index = bpy.props.StringProperty()
+    operation : bpy.props.StringProperty()
+    collection : bpy.props.StringProperty()
+    index : bpy.props.StringProperty()
 
     def execute(self, context):
         data = getattr(context, _ListOp.bl_idname + '.data')

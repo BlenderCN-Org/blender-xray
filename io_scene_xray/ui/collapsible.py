@@ -7,7 +7,7 @@ class _CollapsOp(bpy.types.Operator):
     bl_label = ''
     bl_description = 'Show / hide UI block'
 
-    key = bpy.props.StringProperty()
+    key : bpy.props.StringProperty()
 
     _DATA = {}
 

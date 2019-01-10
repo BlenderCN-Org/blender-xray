@@ -9,7 +9,7 @@ from .utils import with_auto_property
 
 
 def get_preferences():
-    return bpy.context.user_preferences.addons['io_scene_xray'].preferences
+    return bpy.context.preferences.addons['io_scene_xray'].preferences
 
 def PropSDKVersion():
     return bpy.props.EnumProperty(
@@ -114,7 +114,7 @@ class _ExplicitPathOp(bpy.types.Operator):
     bl_label = 'Make Explicit'
     bl_description = 'Make this path explicit using the automatically calculated value'
 
-    path = bpy.props.StringProperty()
+    path : bpy.props.StringProperty()
 
     def execute(self, _context):
         prefs = get_preferences()
@@ -167,21 +167,17 @@ class _ExplicitPathOp(bpy.types.Operator):
 class PluginPreferences(bpy.types.AddonPreferences):
     bl_idname = 'io_scene_xray'
 
-    expert_mode = bpy.props.BoolProperty(
-        name='Expert Mode', description='Show additional properties/controls'
-    )
-    compact_menus = bpy.props.BoolProperty(
-        name='Compact Import/Export Menus', update=update_menu_func
-    )
-    sdk_version = PropSDKVersion()
-    object_motions_import = PropObjectMotionsImport()
-    object_motions_export = PropObjectMotionsExport()
-    object_mesh_split_by_mat = PropObjectMeshSplitByMaterials()
-    object_texture_names_from_path = PropObjectTextureNamesFromPath()
-    object_bones_custom_shapes = PropObjectBonesCustomShapes()
-    anm_create_camera = PropAnmCameraAnimation()
+    expert_mode : bpy.props.BoolProperty(name='Expert Mode', description='Show additional properties/controls')
+    compact_menus : bpy.props.BoolProperty(name='Compact Import/Export Menus', update=update_menu_func)
+    sdk_version : PropSDKVersion()
+    object_motions_import : PropObjectMotionsImport()
+    object_motions_export : PropObjectMotionsExport()
+    object_mesh_split_by_mat : PropObjectMeshSplitByMaterials()
+    object_texture_names_from_path : PropObjectTextureNamesFromPath()
+    object_bones_custom_shapes : PropObjectBonesCustomShapes()
+    anm_create_camera : PropAnmCameraAnimation()
 
-    objects_folder = bpy.props.StringProperty(
+    objects_folder : bpy.props.StringProperty(
         name='Objects Folder',
         default='',
         description='Path to the \'rawdata/objects\' directory',

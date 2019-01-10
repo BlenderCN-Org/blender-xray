@@ -24,8 +24,8 @@ class PropClipOp(bpy.types.Operator):
         ('paste', '', '', 'PASTEDOWN', 1),
         ('clear', '', '', 'X', 2)
     )
-    oper = bpy.props.EnumProperty(items=items)
-    path = bpy.props.StringProperty()
+    oper : bpy.props.EnumProperty(items=items)
+    path : bpy.props.StringProperty()
 
     def execute(self, context):
         *path, prop = self.path.split('.')
@@ -268,19 +268,19 @@ class XRayXrMenuTemplate(dynamic_menu.DynamicMenu):
 class XRayEShaderMenu(XRayXrMenuTemplate):
     bl_idname = 'io_scene_xray.dynmenu.eshader'
     prop_name = 'eshader'
-    cached = XRayXrMenuTemplate.create_cached('eshader_file_auto', parse_shaders)
+    cached : XRayXrMenuTemplate.create_cached('eshader_file_auto', parse_shaders)
 
 
 class XRayCShaderMenu(XRayXrMenuTemplate):
     bl_idname = 'io_scene_xray.dynmenu.cshader'
     prop_name = 'cshader'
-    cached = XRayXrMenuTemplate.create_cached('cshader_file_auto', parse_shaders_xrlc)
+    cached : XRayXrMenuTemplate.create_cached('cshader_file_auto', parse_shaders_xrlc)
 
 
 class XRayGameMtlMenu(XRayXrMenuTemplate):
     bl_idname = 'io_scene_xray.dynmenu.gamemtl'
     prop_name = 'gamemtl'
-    cached = XRayXrMenuTemplate.create_cached('gamemtl_file_auto', parse_gamemtl)
+    cached : XRayXrMenuTemplate.create_cached('gamemtl_file_auto', parse_gamemtl)
 
 
 def _gen_xr_selector(layout, data, name, text):
@@ -544,8 +544,8 @@ class XRayColorizeMaterials(bpy.types.Operator):
     bl_label = 'Colorize Materials'
     bl_description = 'Set a pseudo-random diffuse color for each surface (material)'
 
-    seed = bpy.props.IntProperty(min=0, max=255)
-    power = bpy.props.FloatProperty(default=0.5, min=0.0, max=1.0)
+    seed : bpy.props.IntProperty(min=0, max=255)
+    power : bpy.props.FloatProperty(default=0.5, min=0.0, max=1.0)
 
     def execute(self, context):
         from zlib import crc32
