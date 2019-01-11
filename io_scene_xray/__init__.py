@@ -16,20 +16,7 @@ bl_info = {
 }
 
 import bpy
-import os, importlib, traceback
 from . import xray_inject, plugin
-
-# from .ui.collapsible import _CollapsOp
-# from .ui.list_helper import _ListOp
-# from .ui.dynamic_menu import _DynamicMenuOp, DynamicMenu
-#
-# op_classes = [_CollapsOp,
-#               _ListOp,
-#               _DynamicMenuOp
-#
-#               ]
-#
-# ui_classes = [DynamicMenu]
 
 invalid_types = None
 try:

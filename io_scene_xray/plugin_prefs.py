@@ -84,31 +84,6 @@ __AUTO_PROPS__ = [
 ]
 
 
-# def _auto_path(obj, self_name, path_suffix, checker):
-#     for prop in __AUTO_PROPS__:
-#         if prop == self_name:
-#             continue
-#         value = getattr(obj, prop)
-#
-#         if not value:
-#             continue
-#
-#         print("""------------------------normalize path""", obj, prop, value)
-#
-#         result = path.normpath(value)
-#         if prop != 'gamedata_folder':
-#             dirname = path.dirname(result)
-#             if dirname == result:
-#                 continue  # path.dirname('T:') == 'T:'
-#             result = dirname
-#         if path_suffix:
-#             result = path.join(result, path_suffix)
-#         if checker(result):
-#             return result
-#
-#     return ''
-
-
 def update_menu_func(self, context):
     from . import plugin
     plugin.append_menu_func()
@@ -127,47 +102,6 @@ class _ExplicitPathOp(bpy.types.Operator):
         setattr(prefs, self.path, value)
         return {'FINISHED'}
 
-
-# @with_auto_property(
-#     bpy.props.StringProperty, 'gamedata_folder',
-#     lambda self: _auto_path(self, 'gamedata_folder', '', path.isdir),
-#     name='Gamedata Folder',
-#     description='Path to the \'gamedata\' directory',
-#     subtype='DIR_PATH',
-#     overrides={'subtype': 'NONE'},
-# )
-# @with_auto_property(
-#     bpy.props.StringProperty, 'textures_folder',
-#     lambda self: _auto_path(self, 'textures_folder', 'textures', path.isdir),
-#     name='Textures Folder',
-#     description='Path to the \'gamedata/textures\' directory',
-#     subtype='DIR_PATH',
-#     overrides={'subtype': 'NONE'},
-# )
-# @with_auto_property(
-#     bpy.props.StringProperty, 'gamemtl_file',
-#     lambda self: _auto_path(self, 'gamemtl_file', 'gamemtl.xr', path.isfile),
-#     name='GameMtl File',
-#     description='Path to the \'gamemtl.xr\' file',
-#     subtype='FILE_PATH',
-#     overrides={'subtype': 'NONE'},
-# )
-# @with_auto_property(
-#     bpy.props.StringProperty, 'eshader_file',
-#     lambda self: _auto_path(self, 'eshader_file', 'shaders.xr', path.isfile),
-#     name='EShader File',
-#     description='Path to the \'shaders.xr\' file',
-#     subtype='FILE_PATH',
-#     overrides={'subtype': 'NONE'},
-# )
-# @with_auto_property(
-#     bpy.props.StringProperty, 'cshader_file',
-#     lambda self: _auto_path(self, 'cshader_file', 'shaders_xrlc.xr', path.isfile),
-#     name='CShader File',
-#     description='Path to the \'shaders_xrlc.xr\' file',
-#     subtype='FILE_PATH',
-#     overrides={'subtype': 'NONE'},
-# )
 class PluginPreferences(bpy.types.AddonPreferences):
     bl_idname = 'io_scene_xray'
 
