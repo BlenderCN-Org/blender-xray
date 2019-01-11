@@ -18,7 +18,7 @@ def import_(filepath, chunked_reader, operator):
                 bpy_mesh = bpy.data.meshes.new(object_name)
                 bpy_obj = bpy.data.objects.new(object_name, bpy_mesh)
                 bpy_obj.show_x_ray = True
-                bpy.context.scene.objects.link(bpy_obj)
+                bpy.context.scene.collection.objects.link(bpy_obj)
 
                 vertices = []
                 faces = []

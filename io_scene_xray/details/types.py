@@ -3,6 +3,8 @@ import bpy
 
 
 class XRayObjectDetailsSlotsMeshesProperties(bpy.types.PropertyGroup):
+    reg_order = 1
+
     mesh_0 : bpy.props.StringProperty()
     mesh_1 : bpy.props.StringProperty()
     mesh_2 : bpy.props.StringProperty()
@@ -10,6 +12,7 @@ class XRayObjectDetailsSlotsMeshesProperties(bpy.types.PropertyGroup):
 
 
 class XRayObjectDetailsSlotsLightingProperties(bpy.types.PropertyGroup):
+    reg_order = 1
 
     format : bpy.props.EnumProperty(
         name='Format',
@@ -26,6 +29,7 @@ class XRayObjectDetailsSlotsLightingProperties(bpy.types.PropertyGroup):
 
 
 class XRayObjectDetailsSlotsProperties(bpy.types.PropertyGroup):
+    reg_order = 5
 
     meshes : bpy.props.PointerProperty(
         type=XRayObjectDetailsSlotsMeshesProperties
@@ -40,7 +44,20 @@ class XRayObjectDetailsSlotsProperties(bpy.types.PropertyGroup):
     slots_top_object : bpy.props.StringProperty()
 
 
+def _update_detail_color_by_index(self, context):
+
+    if hasattr(context.object, 'xray'):
+
+        from . import utility
+
+        color_indices = utility.generate_color_indices()
+
+        context.object.xray.detail.model.color = \
+            color_indices[context.object.xray.detail.model.index][0 : 3]
+
+
 class XRayObjectDetailsModelProperties(bpy.types.PropertyGroup):
+    reg_order = 1
 
     no_waving : bpy.props.BoolProperty(
         description='No Waving',
@@ -50,17 +67,6 @@ class XRayObjectDetailsModelProperties(bpy.types.PropertyGroup):
 
     min_scale : bpy.props.FloatProperty(default=1.0, min=0.1, max=100.0)
     max_scale : bpy.props.FloatProperty(default=1.0, min=0.1, max=100.0)
-
-    def _update_detail_color_by_index(self, context):
-
-        if hasattr(context.object, 'xray'):
-
-            from . import utility
-
-            color_indices = utility.generate_color_indices()
-
-            context.object.xray.detail.model.color = \
-                color_indices[context.object.xray.detail.model.index][0 : 3]
 
     index : bpy.props.IntProperty(
         default=0,
@@ -79,6 +85,7 @@ class XRayObjectDetailsModelProperties(bpy.types.PropertyGroup):
 
 
 class XRayObjectDetailsProperties(bpy.types.PropertyGroup):
+    reg_order = 10
 
     # detail model options
     model : bpy.props.PointerProperty(type=XRayObjectDetailsModelProperties)

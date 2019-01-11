@@ -1,7 +1,6 @@
 import bpy
 import mathutils
 
-from io_scene_xray import registry
 from io_scene_xray.xray_motions import MATRIX_BONE, MATRIX_BONE_INVERTED
 from .base_bone import AbstractBoneEditHelper
 
@@ -36,7 +35,6 @@ class _BoneCenterEditHelper(AbstractBoneEditHelper):
 HELPER = _BoneCenterEditHelper('bone-center-edit')
 
 
-@registry.module_thing
 class _EditCenter(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_bone_center'
     bl_label = 'Edit Bone Center'
@@ -52,7 +50,6 @@ class _EditCenter(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@registry.module_thing
 class _AlignCenter(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_bone_center_align'
     bl_label = 'Align Center'
@@ -78,7 +75,6 @@ class _AlignCenter(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@registry.module_thing
 class _ApplyCenter(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_bone_center_apply'
     bl_label = 'Apply Center'

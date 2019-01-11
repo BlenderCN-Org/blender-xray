@@ -75,6 +75,7 @@ def _cop_sgfunc(group_a, group_b, edge_a, edge_b):
 _SHARP = 0xffffffff
 _MIN_WEIGHT = 0.0002
 
+
 @log.with_context(name='mesh')
 def _import_mesh(context, creader, renamemap):
     ver = creader.nextf(Chunks.Mesh.VERSION, 'H')[0]
@@ -109,7 +110,7 @@ def _import_mesh(context, creader, renamemap):
             mesh_name = PackedReader(data).gets()
             log.update(name=mesh_name)
         elif cid == Chunks.Mesh.SG:
-            if not data:    # old object format
+            if not data:  # old object format
                 continue
             has_sg_chunk = True
             sgroups = data.cast('I')
@@ -128,6 +129,7 @@ def _import_mesh(context, creader, renamemap):
                         edict[bme.index] = (sm_group, eidx)
                     elif not sgfuncs[1](prev[0], sm_group, prev[1], eidx):
                         bme.smooth = False
+
             face_sg = face_sg_impl
         elif cid == Chunks.Mesh.SFACE:
             reader = PackedReader(data)
@@ -167,7 +169,8 @@ def _import_mesh(context, creader, renamemap):
                     bml = bmsh.loops.layers.uv.get(name)
                     if bml is None:
                         bml = bmsh.loops.layers.uv.new(name)
-                        bml_texture = bmsh.faces.layers.tex.new(name)
+                        # TODO add texture assignment
+                        # bml_texture = bmsh.faces.layers.tex.new(name)
                     uvs = reader.getb(size * 8).cast('f')
                     if cid == Chunks.Mesh.VMAPS2:
                         reader.skip(size * 4)
@@ -298,7 +301,8 @@ def _import_mesh(context, creader, renamemap):
     if face_sg:
         bm_data.use_auto_smooth = True
         bm_data.auto_smooth_angle = math.pi
-        bm_data.show_edge_sharp = True
+        # TODO show sharp edges
+        # bm_data.show_edge_sharp = True
 
     bo_mesh = bpy.data.objects.new(mesh_name, bm_data)
     if mesh_flags is not None:
@@ -317,7 +321,8 @@ def _import_mesh(context, creader, renamemap):
             bmat.xray.version = context.version
         midx = len(bm_data.materials)
         bm_data.materials.append(bmat)
-        images.append(bmat.active_texture.image if bmat.active_texture else None)
+        #TODO texture to material assignment
+        # images.append(bmat.active_texture.image if bmat.active_texture else None)
         f_facez.append((faces, midx))
 
     local_class = LocalComplex if vgroups else LocalSimple
@@ -384,7 +389,7 @@ def _import_mesh(context, creader, renamemap):
             )
         log.warn(msg)
 
-    if not has_sg_chunk:    # old object format
+    if not has_sg_chunk:  # old object format
         for face in bmsh.faces:
             face.smooth = True
 
@@ -526,6 +531,7 @@ def _import_bone(context, creader, bpy_arm_obj, renamemap):
         else:
             log.debug('unknown chunk', cid=cid)
 
+
 def _is_compatible_texture(texture, filepart):
     image = getattr(texture, 'image', None)
     if image is None:
@@ -533,6 +539,7 @@ def _is_compatible_texture(texture, filepart):
     if filepart not in image.filepath:
         return False
     return True
+
 
 def _import_main(fpath, context, creader):
     object_name = os.path.basename(fpath.lower())
@@ -552,7 +559,7 @@ def _import_main(fpath, context, creader):
         elif cid == Chunks.Object.MESHES:
             meshes_data = data
         elif (cid == Chunks.Object.SURFACES) or (cid == Chunks.Object.SURFACES1) or \
-            (cid == Chunks.Object.SURFACES2):
+                (cid == Chunks.Object.SURFACES2):
             reader = PackedReader(data)
             surfaces_count = reader.int()
             if cid == Chunks.Object.SURFACES:
@@ -566,13 +573,13 @@ def _import_main(fpath, context, creader):
                     name = reader.gets()
                     eshader = reader.gets()
                     flags = reader.getf('B')[0]
-                    reader.skip(4 + 4)    # fvf and TCs count
+                    reader.skip(4 + 4)  # fvf and TCs count
                     texture = reader.gets()
                     vmap = reader.gets()
                     if texture != vmap or not (texture and vmap):
                         old_object_format = False
                         renamemap[vmap.lower()] = vmap
-                    else:    # old format (Objects\Rainbow\lest.object)
+                    else:  # old format (Objects\Rainbow\lest.object)
                         old_object_format = True
                         vmap = 'Texture'
                     gamemtl = 'default'
@@ -587,12 +594,12 @@ def _import_main(fpath, context, creader):
                     if texture != vmap or not (texture and vmap):
                         old_object_format = False
                         renamemap[vmap.lower()] = vmap
-                    else:    # old format (Objects\corps\corp_BYAKA.object)
+                    else:  # old format (Objects\corps\corp_BYAKA.object)
                         old_object_format = True
                         vmap = 'Texture'
                     renamemap[vmap.lower()] = vmap
                     flags = reader.int()
-                    reader.skip(4 + 4)    # fvf and ?
+                    reader.skip(4 + 4)  # fvf and ?
                 bpy_material = None
                 tx_filepart = texture.replace('\\', os.path.sep).lower()
                 for material in bpy.data.materials:
@@ -634,36 +641,36 @@ def _import_main(fpath, context, creader):
                     bpy_material.xray.eshader = eshader
                     bpy_material.xray.cshader = cshader
                     bpy_material.xray.gamemtl = gamemtl
-                    bpy_material.use_shadeless = True
-                    bpy_material.use_transparency = True
-                    bpy_material.alpha = 0
                     if texture:
-                        bpy_texture = bpy.data.textures.get(texture)
-                        if (bpy_texture is None) \
-                            or not _is_compatible_texture(bpy_texture, tx_filepart):
-                            bpy_texture = bpy.data.textures.new(texture, type='IMAGE')
-                            bpy_texture.image = context.image(texture)
-                            bpy_texture.use_preview_alpha = True
-                        bpy_texture_slot = bpy_material.texture_slots.add()
-                        bpy_texture_slot.texture = bpy_texture
-                        bpy_texture_slot.texture_coords = 'UV'
-                        bpy_texture_slot.uv_layer = vmap
-                        bpy_texture_slot.use_map_color_diffuse = True
-                        bpy_texture_slot.use_map_alpha = True
+                        # TODO creage texture to material assignment
+                        # bpy_texture = bpy.data.textures.get(texture)
+                        # if (bpy_texture is None) \
+                        #     or not _is_compatible_texture(bpy_texture, tx_filepart):
+                        #     bpy_texture = bpy.data.textures.new(texture, type='IMAGE')
+                        #     bpy_texture.image = context.image(texture)
+                        #     bpy_texture.use_preview_alpha = True
+                        # bpy_texture_slot = bpy_material.texture_slots.add()
+                        # bpy_texture_slot.texture = bpy_texture
+                        # bpy_texture_slot.texture_coords = 'UV'
+                        # bpy_texture_slot.uv_layer = vmap
+                        # bpy_texture_slot.use_map_color_diffuse = True
+                        # bpy_texture_slot.use_map_alpha = True
+                        pass
+
                 context.loaded_materials[name] = bpy_material
         elif (cid == Chunks.Object.BONES) or (cid == Chunks.Object.BONES1):
             if cid == Chunks.Object.BONES:
                 reader = PackedReader(data)
                 bones_count = reader.int()
                 if not bones_count:
-                    continue    # Do not create an armature if zero bones
+                    continue  # Do not create an armature if zero bones
             if bpy and (bpy_arm_obj is None):
                 bpy_armature = bpy.data.armatures.new(object_name)
                 bpy_armature.use_auto_ik = True
                 bpy_armature.draw_type = 'STICK'
                 bpy_arm_obj = bpy.data.objects.new(object_name, bpy_armature)
                 bpy_arm_obj.show_x_ray = True
-                bpy.context.scene.objects.link(bpy_arm_obj)
+                bpy.context.scene.collection.objects.link(bpy_arm_obj)
                 bpy.context.scene.objects.active = bpy_arm_obj
             if cid == Chunks.Object.BONES:
                 for _ in range(bones_count):
@@ -741,7 +748,7 @@ def _import_main(fpath, context, creader):
             mesh.parent = bpy_arm_obj
 
         mesh_objects.append(mesh)
-        bpy.context.scene.objects.link(mesh)
+        bpy.context.scene.collection.objects.link(mesh)
 
     bpy_obj = bpy_arm_obj
     if bpy_obj is None:
@@ -752,13 +759,13 @@ def _import_main(fpath, context, creader):
             bpy_obj = bpy.data.objects.new(object_name, None)
             for mesh in mesh_objects:
                 mesh.parent = bpy_obj
-            bpy.context.scene.objects.link(bpy_obj)
+            bpy.context.scene.collection.objects.link(bpy_obj)
 
     bpy_obj.xray.version = context.version
     bpy_obj.xray.isroot = True
     if fpath.lower().startswith(context.objects_folder.lower()) and context.objects_folder:
         object_folder_length = len(context.objects_folder)
-        bpy_obj.xray.export_path = os.path.dirname(fpath.lower())[object_folder_length : ]
+        bpy_obj.xray.export_path = os.path.dirname(fpath.lower())[object_folder_length:]
 
     for (cid, data) in unread_chunks:
         if cid == Chunks.Object.TRANSFORM:
@@ -766,12 +773,12 @@ def _import_main(fpath, context, creader):
             pos = read_v3f(reader)
             rot = read_v3f(reader)
             bpy_obj.matrix_basis *= mathutils.Matrix.Translation(pos) \
-                * mathutils.Euler(rot, 'YXZ').to_matrix().to_4x4()
+                                    * mathutils.Euler(rot, 'YXZ').to_matrix().to_4x4()
         elif cid == Chunks.Object.FLAGS:
             length_data = len(data)
             if length_data == 4:
                 bpy_obj.xray.flags = PackedReader(data).int()
-            elif length_data == 1:    # old object format
+            elif length_data == 1:  # old object format
                 bpy_obj.xray.flags = PackedReader(data).getf('B')[0]
         elif cid == Chunks.Object.USERDATA:
             bpy_obj.xray.userdata = \

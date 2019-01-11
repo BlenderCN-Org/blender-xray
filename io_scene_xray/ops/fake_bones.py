@@ -1,10 +1,9 @@
 import bpy
 
-from io_scene_xray import registry, utils
+from io_scene_xray import utils
 
 from . import BaseOperator
 
-@registry.module_thing
 class CreateFakeBones(BaseOperator):
     bl_idname = 'io_scene_xray.create_fake_bones'
     bl_label = 'Create Fake Bones'
@@ -50,7 +49,6 @@ class CreateFakeBones(BaseOperator):
         return {'FINISHED'}
 
 
-@registry.module_thing
 class DeleteFakeBones(BaseOperator):
     bl_idname = 'io_scene_xray.delete_fake_bones'
     bl_label = 'Delete Fake Bones'
@@ -77,7 +75,6 @@ class DeleteFakeBones(BaseOperator):
         return {'FINISHED'}
 
 
-@registry.module_thing
 class ToggleFakeBonesVisibility(BaseOperator):
     bl_idname = 'io_scene_xray.toggle_fake_bones_visibility'
     bl_label = 'Show/Hide Fake Bones'

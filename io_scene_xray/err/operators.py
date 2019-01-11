@@ -3,11 +3,10 @@ import bpy
 from bpy_extras import io_utils
 
 from ..ops import BaseOperator as TestReadyOperator
-from .. import registry
 from . import imp
 
 
-@registry.module_thing
+
 class OpImportERR(TestReadyOperator, io_utils.ImportHelper):
     bl_idname = 'xray_import.err'
     bl_label = 'Import .err'

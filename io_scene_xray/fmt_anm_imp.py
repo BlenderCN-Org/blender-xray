@@ -31,11 +31,11 @@ def _import(fpath, creader, context):
                 bpy_cam = bpy.data.objects.new(name + '.camera', bpy.data.cameras.new(name))
                 bpy_cam.parent = bpy_obj
                 bpy_cam.rotation_euler = (math.pi / 2, 0, 0)
-                bpy.context.scene.objects.link(bpy_cam)
+                bpy.context.scene.collection.objects.link(bpy_cam)
             else:
                 bpy_obj.empty_draw_type = 'SPHERE'
             bpy_obj.empty_draw_size = 0.5
-            bpy.context.scene.objects.link(bpy_obj)
+            bpy.context.scene.collection.objects.link(bpy_obj)
             action = bpy.data.actions.new(name=name)
             action.xray.fps = fps
             bpy_obj.animation_data_create().action = action

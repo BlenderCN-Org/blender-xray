@@ -48,7 +48,7 @@ class OpImportDM(bpy.types.Operator, io_utils.ImportHelper):
 
     def execute(self, context):
 
-        textures_folder = plugin_prefs.get_preferences().textures_folder_auto
+        textures_folder = plugin_prefs.get_preferences().textures_folder
 
         if not textures_folder:
             self.report({'WARNING'}, 'No textures folder specified')
@@ -107,16 +107,16 @@ class OpImportDM(bpy.types.Operator, io_utils.ImportHelper):
         layout = self.layout
         row = layout.row()
         row.enabled = False
-        row.label('%d items' % len(self.files))
+        row.label(text='%d items' % len(self.files))
 
         box = layout.box()
-        box.label('Level Details Options:')
+        box.label(text='Level Details Options:')
 
         box.prop(self, 'details_models_in_a_row')
         box.prop(self, 'load_slots')
 
         if self.load_slots:
-            box.label('Format:')
+            box.label(text='Format:')
             row = box.row()
             row.prop(self, 'format', expand=True)
 
@@ -183,7 +183,7 @@ class OpExportDM(bpy.types.Operator, io_utils.ExportHelper):
     detail_model : bpy.props.StringProperty(options={'HIDDEN'})
 
     filter_glob : bpy.props.StringProperty(
-        default='*'+filename_ext, options={'HIDDEN'}
+        default=filename_ext, options={'HIDDEN'}
         )
 
     texture_name_from_image_path : plugin_prefs.PropObjectTextureNamesFromPath()
@@ -241,7 +241,7 @@ class OpExportLevelDetails(bpy.types.Operator, io_utils.ExportHelper):
     filename_ext = '.details'
 
     filter_glob : bpy.props.StringProperty(
-        default='*'+filename_ext, options={'HIDDEN'}
+        default=filename_ext, options={'HIDDEN'}
         )
 
     texture_name_from_image_path : plugin_prefs.PropObjectTextureNamesFromPath()
@@ -260,7 +260,7 @@ class OpExportLevelDetails(bpy.types.Operator, io_utils.ExportHelper):
         layout = self.layout
 
         layout.prop(self, 'texture_name_from_image_path')
-        layout.label('Format:')
+        layout.label(text='Format:')
         col = layout.column()
         col.prop(self, 'format_version', expand=True)
 
