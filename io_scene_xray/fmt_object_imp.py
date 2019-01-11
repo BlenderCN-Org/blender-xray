@@ -12,6 +12,7 @@ from .plugin_prefs import PropObjectMeshSplitByMaterials
 from .utils import BAD_VTX_GROUP_NAME, plugin_version_number, AppError
 from .xray_motions import import_motions, MATRIX_BONE, MATRIX_BONE_INVERTED
 from . import log
+from . import plugin_prefs
 
 
 class ImportContext:
@@ -256,7 +257,7 @@ def _import_mesh(context, creader, renamemap):
                     nonlocal bad_vgroup
                     if bad_vgroup == -1:
                         bad_vgroup = len(bo_mesh.vertex_groups)
-                        bo_mesh.vertex_groups.new(BAD_VTX_GROUP_NAME)
+                        bo_mesh.vertex_groups.new(name=BAD_VTX_GROUP_NAME)
                     self.__next = self.__class__(lvl + 1, badvg=bad_vgroup)
                 return self.__next._mkf(fr, i0, i1, i2)
 
@@ -321,7 +322,7 @@ def _import_mesh(context, creader, renamemap):
             bmat.xray.version = context.version
         midx = len(bm_data.materials)
         bm_data.materials.append(bmat)
-        #TODO texture to material assignment
+        # TODO texture to material assignment
         # images.append(bmat.active_texture.image if bmat.active_texture else None)
         f_facez.append((faces, midx))
 
@@ -541,6 +542,37 @@ def _is_compatible_texture(texture, filepart):
     return True
 
 
+def create_bdsf_nodes_setup(mat, texture_path):
+    prefs = plugin_prefs.get_preferences()
+    addon_tex_path = prefs.textures_folder
+
+    texture_path = os.path.join(addon_tex_path, texture_path + ".dds")
+
+    if os.path.exists(texture_path):
+        image = bpy.data.images.load(filepath=texture_path, check_existing=True)
+    else:
+        image = None
+
+    mat.use_nodes = True
+
+    node_tree = mat.node_tree
+
+    node_tree.nodes.clear()
+
+    bsdf_node = node_tree.nodes.new(type="ShaderNodeBsdfPrincipled")
+    out_node = node_tree.nodes.new(type="ShaderNodeOutputMaterial")
+    out_node.location = 400, 0
+    node_tree.links.new(out_node.inputs[0], bsdf_node.outputs[0])
+
+    if image:
+        texture_node = node_tree.nodes.new(type="ShaderNodeTexImage")
+        texture_node.image = image
+
+        texture_node.location = -400, 0
+
+        node_tree.links.new(bsdf_node.inputs['Base Color'], texture_node.outputs['Color'])
+
+
 def _import_main(fpath, context, creader):
     object_name = os.path.basename(fpath.lower())
 
@@ -620,18 +652,6 @@ def _import_main(fpath, context, creader):
                             bpy_material = material
                             break
 
-                    ts_found = False
-                    for slot in material.texture_slots:
-                        if not slot:
-                            continue
-                        if slot.uv_layer != vmap:
-                            continue
-                        if not _is_compatible_texture(slot.texture, tx_filepart):
-                            continue
-                        ts_found = True
-                        break
-                    if not ts_found:
-                        continue
                     bpy_material = material
                     break
                 if bpy_material is None:
@@ -643,19 +663,8 @@ def _import_main(fpath, context, creader):
                     bpy_material.xray.gamemtl = gamemtl
                     if texture:
                         # TODO creage texture to material assignment
-                        # bpy_texture = bpy.data.textures.get(texture)
-                        # if (bpy_texture is None) \
-                        #     or not _is_compatible_texture(bpy_texture, tx_filepart):
-                        #     bpy_texture = bpy.data.textures.new(texture, type='IMAGE')
-                        #     bpy_texture.image = context.image(texture)
-                        #     bpy_texture.use_preview_alpha = True
-                        # bpy_texture_slot = bpy_material.texture_slots.add()
-                        # bpy_texture_slot.texture = bpy_texture
-                        # bpy_texture_slot.texture_coords = 'UV'
-                        # bpy_texture_slot.uv_layer = vmap
-                        # bpy_texture_slot.use_map_color_diffuse = True
-                        # bpy_texture_slot.use_map_alpha = True
-                        pass
+                        bpy_texture = bpy.data.textures.get(texture)
+                        create_bdsf_nodes_setup(bpy_material, texture)
 
                 context.loaded_materials[name] = bpy_material
         elif (cid == Chunks.Object.BONES) or (cid == Chunks.Object.BONES1):
@@ -760,6 +769,12 @@ def _import_main(fpath, context, creader):
             for mesh in mesh_objects:
                 mesh.parent = bpy_obj
             bpy.context.scene.collection.objects.link(bpy_obj)
+
+    bpy.data.scenes[0].render.engine = 'BLENDER_EEVEE'
+    for screen in bpy.data.screens:
+        for area in screen.areas:
+            if area.type == 'VIEW_3D':
+                area.spaces[0].shading.type = 'MATERIAL'
 
     bpy_obj.xray.version = context.version
     bpy_obj.xray.isroot = True

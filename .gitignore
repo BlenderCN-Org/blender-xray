@@ -1,4 +1,10 @@
 __pycache__
 htmlcov
 coverage.xml
+
+.idea/blender-xray.iml
+.idea/misc.xml
+.idea/modules.xml
+
+
 *.bat
