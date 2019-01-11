@@ -1,19 +1,22 @@
 import bpy
 
-from io_scene_xray import registry
 
 class _CollapsOp(bpy.types.Operator):
     bl_idname = 'io_scene_xray.collaps'
     bl_label = ''
     bl_description = 'Show / hide UI block'
 
-    key : bpy.props.StringProperty()
+    key: bpy.props.StringProperty()
 
     _DATA = {}
 
     @classmethod
     def get(cls, key):
         return cls._DATA.get(key, False)
+
+    @classmethod
+    def poll(self, context):
+        return True
 
     def execute(self, _context):
         _CollapsOp._DATA[self.key] = not _CollapsOp.get(self.key)
@@ -31,9 +34,7 @@ def draw(layout, key, text=None, enabled=None, icon=None, style=None):
     isshow = _CollapsOp.get(key)
     if icon is None:
         icon = 'TRIA_DOWN' if isshow else 'TRIA_RIGHT'
-    kwargs = {}
-    if text is not None:
-        kwargs['text'] = text
+
     box = None
     if isshow:
         box = col
@@ -45,17 +46,14 @@ def draw(layout, key, text=None, enabled=None, icon=None, style=None):
         if box:
             bxr = box.row(align=True)
             bxr.alignment = 'LEFT'
-            bxr.label('')
+            bxr.label(text='')
             box = bxr.column()
-    oper = row_operator.operator(_CollapsOp.bl_idname, icon=icon, emboss=style != 'tree', **kwargs)
+    oper = row_operator.operator(_CollapsOp.bl_idname, icon=icon, emboss=style != 'tree',
+                                 text=text if text is not None else "")
+
     oper.key = key
     return row, box
 
 
 def is_opened(key):
     return _CollapsOp.get(key)
-
-
-registry.module_requires(__name__, [
-    _CollapsOp,
-])

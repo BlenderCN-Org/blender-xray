@@ -4,7 +4,7 @@ import bpy
 import bmesh
 import mathutils
 
-from io_scene_xray import registry, utils
+from io_scene_xray import utils
 from .base_bone import AbstractBoneEditHelper
 
 
@@ -61,7 +61,7 @@ def _create_bmesh(shape_type):
     return mesh
 
 
-@registry.module_thing
+
 class _EditShape(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_bone_shape'
     bl_label = 'Edit Bone Shape'
@@ -102,7 +102,7 @@ def _bone_matrix(bone):
     return mat
 
 
-@registry.module_thing
+
 class _ApplyShape(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_bone_shape_apply'
     bl_label = 'Apply Shape'
@@ -180,7 +180,7 @@ def _bone_vertices(bone):
                 yield vtx.co
 
 
-@registry.module_thing
+
 class _FitShape(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_bone_shape_fit'
     bl_label = 'Fit Shape'

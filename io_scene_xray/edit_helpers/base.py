@@ -1,6 +1,6 @@
 import bpy
 
-from io_scene_xray import registry, utils
+from io_scene_xray import utils
 
 __HELPERS__ = dict()
 
@@ -27,7 +27,7 @@ class AbstractHelper:
             helper.draw_type = 'WIRE'
             helper.show_x_ray = True
             helper.hide_render = True
-            bpy.context.scene.objects.link(helper)
+            bpy.context.scene.collection.objects.link(helper)
 
         helper.parent = bpy.context.active_object
         self._update_helper(helper, target)
@@ -95,7 +95,7 @@ def get_object_helper(context):
     return helper
 
 
-@registry.module_thing
+
 class EditCancel(bpy.types.Operator):
     bl_idname = 'io_scene_xray.edit_cancel'
     bl_label = 'Cancel'

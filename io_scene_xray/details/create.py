@@ -8,14 +8,14 @@ def create_details_slots_object(base_name, header, y_coords_top, y_coords_base):
     slots_base_object = bpy.data.objects.new(
         slots_name_base, slots_base_mesh
         )
-    bpy.context.scene.objects.link(slots_base_object)
+    bpy.context.scene.collection.objects.link(slots_base_object)
 
     slots_name_top = '{0} slots top'.format(base_name)
     slots_top_mesh = bpy.data.meshes.new(slots_name_top)
     slots_top_object = bpy.data.objects.new(
         slots_name_top, slots_top_mesh
         )
-    bpy.context.scene.objects.link(slots_top_object)
+    bpy.context.scene.collection.objects.link(slots_top_object)
 
     slots_base = []
     uvs = []

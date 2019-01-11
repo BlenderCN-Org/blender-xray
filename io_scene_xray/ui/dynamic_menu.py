@@ -1,8 +1,5 @@
 import bpy
-from io_scene_xray import registry
 
-
-@registry.module_thing
 class _DynamicMenuOp(bpy.types.Operator):
     bl_idname = 'io_scene_xray.dynmenu'
     bl_label = ''

@@ -1,8 +1,5 @@
 import bpy
-from io_scene_xray import registry
 
-
-@registry.module_thing
 class _ListOp(bpy.types.Operator):
     bl_idname = 'io_scene_xray.list'
     bl_label = ''
@@ -42,9 +39,9 @@ def draw_list_ops(layout, dataptr, propname, active_propname):
         operator.index = active_propname
 
     layout.context_pointer_set(_ListOp.bl_idname + '.data', dataptr)
-    operator('add', 'ZOOMIN')
+    operator('add', 'ZOOM_IN')
     collection = getattr(dataptr, propname)
     index = getattr(dataptr, active_propname)
-    operator('remove', 'ZOOMOUT', enabled=(index >= 0) and (index < len(collection)))
+    operator('remove', 'ZOOM_OUT', enabled=(index >= 0) and (index < len(collection)))
     operator('move_up', 'TRIA_UP', enabled=(index > 0) and (index < len(collection)))
     operator('move_down', 'TRIA_DOWN', enabled=(index >= 0) and (index < len(collection) - 1))

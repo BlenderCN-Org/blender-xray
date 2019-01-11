@@ -9,6 +9,7 @@ def requires(*things):
     def decorator(thing):
         _process_and_set_requires(thing, things)
         return thing
+
     return decorator
 
 
@@ -45,7 +46,7 @@ def register_thing(thing, user=_default_user()):
                 call()
             elif required == []:
                 raise Exception('Unsupported thing %s' % thing, err, user)
-            
+
     users.append(user)
 
 

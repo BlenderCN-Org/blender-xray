@@ -8,7 +8,7 @@ def create_object(object_name):
     bpy_mesh = bpy.data.meshes.new(object_name)
     bpy_obj = bpy.data.objects.new(object_name, bpy_mesh)
     bpy_obj.xray.is_details = True
-    bpy.context.scene.objects.link(bpy_obj)
+    bpy.context.scene.collection.objects.link(bpy_obj)
     return bpy_obj, bpy_mesh
 
 

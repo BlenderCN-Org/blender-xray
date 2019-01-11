@@ -6,7 +6,6 @@ from .ui import dynamic_menu, list_helper, collapsible
 from .ops import fake_bones
 from .utils import create_cached_file_data, parse_shaders, parse_shaders_xrlc, parse_gamemtl, \
     is_helper_object
-from . import registry
 from . import details
 
 
@@ -24,8 +23,8 @@ class PropClipOp(bpy.types.Operator):
         ('paste', '', '', 'PASTEDOWN', 1),
         ('clear', '', '', 'X', 2)
     )
-    oper : bpy.props.EnumProperty(items=items)
-    path : bpy.props.StringProperty()
+    oper: bpy.props.EnumProperty(items=items)
+    path: bpy.props.StringProperty()
 
     def execute(self, context):
         *path, prop = self.path.split('.')
@@ -53,15 +52,23 @@ class PropClipOp(bpy.types.Operator):
 
 
 class XRayPanel(bpy.types.Panel):
-    bl_label = _build_label()
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
+    reg_order = 1
+
+    bl_label = "XRay"
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "XRay"
+
+    bl_idname = "XRayPanel"
 
     def draw_header(self, _context):
         self.layout.label(icon='PLUGIN')
 
+    def draw(self, context):
+        pass
 
-@registry.module_thing
+
 class XRayMotionList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         data = context.object.xray
@@ -77,10 +84,21 @@ class XRayMotionList(bpy.types.UIList):
         row.prop_search(motion, 'name', bpy.data, 'actions', text='')
 
 
-@registry.requires(list_helper, PropClipOp)
-class XRayObjectPanel(XRayPanel):
+class XRayObjectPanel(bpy.types.Panel):
+    reg_order = 10
     bl_context = 'object'
-    bl_label = _build_label('Object')
+
+    bl_label = 'Object'
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayObjectPanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -180,9 +198,21 @@ class XRayObjectPanel(XRayPanel):
                 details.ui.draw_function(self, context)
 
 
-class XRayMeshPanel(XRayPanel):
+class XRayMeshPanel(bpy.types.Panel):
+    reg_order = 10
+
     bl_context = 'data'
-    bl_label = _build_label('Mesh')
+    bl_label = 'Mesh'
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayMeshPanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -202,10 +232,21 @@ class XRayMeshPanel(XRayPanel):
         row.prop(data, 'flags_sgmask', text='SGMask', toggle=True)
 
 
-@registry.requires(base_edit_helper)
-class XRayEditHelperObjectPanel(XRayPanel):
+class XRayEditHelperObjectPanel(bpy.types.Panel):
+    reg_order = 10
+
     bl_context = 'object'
-    bl_label = _build_label('Edit Helper')
+    bl_label = 'Edit Helper'
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayEditHelperObjectPanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -216,7 +257,6 @@ class XRayEditHelperObjectPanel(XRayPanel):
         helper.draw(self.layout, context)
 
 
-@registry.requires(dynamic_menu)
 class XRayXrMenuTemplate(dynamic_menu.DynamicMenu):
     @staticmethod
     def parse(data, fparse):
@@ -268,19 +308,19 @@ class XRayXrMenuTemplate(dynamic_menu.DynamicMenu):
 class XRayEShaderMenu(XRayXrMenuTemplate):
     bl_idname = 'io_scene_xray.dynmenu.eshader'
     prop_name = 'eshader'
-    cached : XRayXrMenuTemplate.create_cached('eshader_file_auto', parse_shaders)
+    cached: XRayXrMenuTemplate.create_cached('gamemtl_file', parse_shaders)
 
 
 class XRayCShaderMenu(XRayXrMenuTemplate):
     bl_idname = 'io_scene_xray.dynmenu.cshader'
     prop_name = 'cshader'
-    cached : XRayXrMenuTemplate.create_cached('cshader_file_auto', parse_shaders_xrlc)
+    cached: XRayXrMenuTemplate.create_cached('cshader_file', parse_shaders_xrlc)
 
 
 class XRayGameMtlMenu(XRayXrMenuTemplate):
     bl_idname = 'io_scene_xray.dynmenu.gamemtl'
     prop_name = 'gamemtl'
-    cached : XRayXrMenuTemplate.create_cached('gamemtl_file_auto', parse_gamemtl)
+    cached: XRayXrMenuTemplate.create_cached('gamemtl_file', parse_gamemtl)
 
 
 def _gen_xr_selector(layout, data, name, text):
@@ -290,10 +330,21 @@ def _gen_xr_selector(layout, data, name, text):
     row.menu('io_scene_xray.dynmenu.' + name, icon='TRIA_DOWN')
 
 
-@registry.requires(dynamic_menu)
-class XRayMaterialPanel(XRayPanel):
+class XRayMaterialPanel(bpy.types.Panel):
+    reg_order = 10
+
     bl_context = 'material'
-    bl_label = _build_label('Material')
+    bl_label = 'Material'
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayMaterialPanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -308,9 +359,21 @@ class XRayMaterialPanel(XRayPanel):
         _gen_xr_selector(layout, data, 'gamemtl', 'GameMtl')
 
 
-class XRayArmaturePanel(XRayPanel):
+class XRayArmaturePanel(bpy.types.Panel):
+    reg_order = 10
+
     bl_context = 'data'
-    bl_label = _build_label('Skeleton')
+    bl_label = 'Skeleton'
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayArmaturePanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -334,7 +397,7 @@ class XRayArmaturePanel(XRayPanel):
         layout.prop(data, 'display_bone_shapes', toggle=True)
 
         lay = layout.column(align=True)
-        lay.label('Fake Bones:')
+        lay.label(text='Fake Bones:')
         row = lay.row(align=True)
         row.operator(fake_bones.CreateFakeBones.bl_idname, text='Create', icon='CONSTRAINT_BONE')
         row.operator(fake_bones.DeleteFakeBones.bl_idname, text='Delete', icon='X')
@@ -345,10 +408,21 @@ class XRayArmaturePanel(XRayPanel):
         )
 
 
-@registry.requires(dynamic_menu, bone_shape, bone_center)
-class XRayBonePanel(XRayPanel):
+class XRayBonePanel(bpy.types.Panel):
+    reg_order = 10
+
     bl_context = 'bone'
-    bl_label = _build_label('Bone')
+    bl_label = 'Bone'
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayBonePanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -396,15 +470,15 @@ class XRayBonePanel(XRayPanel):
         col.prop(data.ikjoint, 'spring', text='Spring')
         col.prop(data.ikjoint, 'damping', text='Damping')
         col = box.column(align=True)
-        col.label('Limit X:')
+        col.label(text='Limit X:')
         col.prop(data.ikjoint, 'lim_x_spr', 'Spring')
         col.prop(data.ikjoint, 'lim_x_dmp', 'Damping')
         col = box.column(align=True)
-        col.label('Limit Y:')
+        col.label(text='Limit Y:')
         col.prop(data.ikjoint, 'lim_y_spr', 'Spring')
         col.prop(data.ikjoint, 'lim_y_dmp', 'Damping')
         col = box.column(align=True)
-        col.label('Limit Z:')
+        col.label(text='Limit Z:')
         col.prop(data.ikjoint, 'lim_z_spr', 'Spring')
         col.prop(data.ikjoint, 'lim_z_dmp', 'Damping')
         col = box.column(align=True)
@@ -418,12 +492,14 @@ class XRayBonePanel(XRayPanel):
         bone_center.HELPER.draw(box.column(align=True), context)
 
 
-class XRayActionPanel(XRayPanel):
+class XRayActionPanel(bpy.types.Panel):
+    reg_order = 10
+
     bl_category = 'F-Curve'
     bl_space_type = 'DOPESHEET_EDITOR' if bpy.app.version >= (2, 78, 0) else 'GRAPH_EDITOR'
     bl_region_type = 'UI'
     bl_context = 'object'
-    bl_label = _build_label('Action')
+    bl_label = 'Action'
 
     @classmethod
     def poll(cls, context):
@@ -467,12 +543,12 @@ class XRayActionPanel(XRayPanel):
         layout.prop(data, 'flags_fx', text='Type FX', toggle=True)
         if data.flags_fx:
             row = layout.row(align=True)
-            row.label('Start Bone:')
+            row.label(text='Start Bone:')
             row.prop_search(data, 'bonestart_name', obj.pose, 'bones', text='')
             layout.prop(data, 'power', text='Power')
         else:
             row = layout.row(align=True)
-            row.label('Bone Part:')
+            row.label(text='Bone Part:')
             row.prop_search(data, 'bonepart_name', obj.pose, 'bone_groups', text='')
             row = layout.row(align=True)
             row.prop(data, 'flags_stopatend', text='Stop', toggle=True)
@@ -482,9 +558,19 @@ class XRayActionPanel(XRayPanel):
         layout.operator(OpExportSkl.bl_idname, icon='EXPORT')
 
 
-class XRayScenePanel(XRayPanel):
+class XRayScenePanel(bpy.types.Panel):
     bl_context = 'scene'
-    bl_label = _build_label('Project')
+    bl_label = "Scene"
+
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayScenePanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
         from .plugin import OpExportProject
@@ -530,8 +616,8 @@ class XRayScenePanel(XRayPanel):
             lay = lay.split()
             lay.alert = True
         lay.prop(data, 'export_root')
-        row = layout.split(0.33)
-        row.label('Format Version:')
+        row = layout.split(factor=0.33)
+        row.label(text='Format Version:')
         row.row().prop(data, 'fmt_version', expand=True)
         _, box = collapsible.draw(layout, 'scene:object', 'Object Export Properties')
         if box:
@@ -544,8 +630,8 @@ class XRayColorizeMaterials(bpy.types.Operator):
     bl_label = 'Colorize Materials'
     bl_description = 'Set a pseudo-random diffuse color for each surface (material)'
 
-    seed : bpy.props.IntProperty(min=0, max=255)
-    power : bpy.props.FloatProperty(default=0.5, min=0.0, max=1.0)
+    seed: bpy.props.IntProperty(min=0, max=255)
+    power: bpy.props.FloatProperty(default=0.5, min=0.0, max=1.0)
 
     def execute(self, context):
         from zlib import crc32
@@ -575,10 +661,16 @@ class XRayColorizeMaterials(bpy.types.Operator):
 
 
 class XRayMaterialToolsPanel(bpy.types.Panel):
-    bl_label = 'XRay Materials'
-    bl_category = 'Materials'
+    bl_label = 'Materials'
     bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'UI'
+
+    bl_idname = "XRayMaterialToolsPanel"
+
+    bl_category = XRayPanel.bl_category
+    bl_parent_id = XRayPanel.bl_idname
+
+    bl_options = {'DEFAULT_CLOSED'}
 
     def draw_header(self, _context):
         self.layout.label(icon='PLUGIN')
@@ -593,21 +685,3 @@ class XRayMaterialToolsPanel(bpy.types.Panel):
         column.prop(data, 'materials_colorize_random_seed', text='Seed')
         column.prop(data, 'materials_colorize_color_power', text='Power', slider=True)
 
-
-registry.module_requires(__name__, [
-    collapsible,
-    fake_bones,
-    XRayObjectPanel
-    , XRayMeshPanel
-    , XRayEditHelperObjectPanel
-    , XRayEShaderMenu
-    , XRayCShaderMenu
-    , XRayGameMtlMenu
-    , XRayMaterialPanel
-    , XRayArmaturePanel
-    , XRayBonePanel
-    , XRayActionPanel
-    , XRayScenePanel
-    , XRayColorizeMaterials
-    , XRayMaterialToolsPanel
-])
