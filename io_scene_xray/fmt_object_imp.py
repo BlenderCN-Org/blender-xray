@@ -395,7 +395,14 @@ def _import_mesh(context, creader, renamemap):
             face.smooth = True
 
     bmsh.normal_update()
+
+    bmsh.edges.ensure_lookup_table()
+    for e in bmsh.edges:
+        if len(e.link_faces) == 2:
+            e.smooth = math.degrees(e.calc_face_angle()) < 70
+
     bmsh.to_mesh(bm_data)
+    bm_data.update()
 
     return bo_mesh
 
@@ -542,35 +549,63 @@ def _is_compatible_texture(texture, filepart):
     return True
 
 
-def create_bdsf_nodes_setup(mat, texture_path):
+def create_bdsf_nodes_setup(mat, tex_path):
     prefs = plugin_prefs.get_preferences()
     addon_tex_path = prefs.textures_folder
+    full_tex_path = os.path.join(addon_tex_path, tex_path + ".dds")
 
-    texture_path = os.path.join(addon_tex_path, texture_path + ".dds")
+    if not os.path.exists(full_tex_path):
+        print("Material skipped(texture not finded: ", mat.name, tex_path)
+        return
 
-    if os.path.exists(texture_path):
-        image = bpy.data.images.load(filepath=texture_path, check_existing=True)
-    else:
-        image = None
+    full_tex_path_bump = full_tex_path.replace(".dds", "_bump.dds")
+    create_normal = os.path.exists(full_tex_path_bump)
 
     mat.use_nodes = True
-
     node_tree = mat.node_tree
+    nodes = node_tree.nodes
+    nodes.clear()
 
-    node_tree.nodes.clear()
+    principled_bsdf_node = nodes.new(type="ShaderNodeBsdfPrincipled")
+    principled_bsdf_node.location = 296, -14
 
-    bsdf_node = node_tree.nodes.new(type="ShaderNodeBsdfPrincipled")
-    out_node = node_tree.nodes.new(type="ShaderNodeOutputMaterial")
-    out_node.location = 400, 0
-    node_tree.links.new(out_node.inputs[0], bsdf_node.outputs[0])
+    material_output_node = nodes.new(type="ShaderNodeOutputMaterial")
+    material_output_node.location = 586, -18
 
-    if image:
-        texture_node = node_tree.nodes.new(type="ShaderNodeTexImage")
-        texture_node.image = image
+    color_tex_node = nodes.new(type="ShaderNodeTexImage")
+    color_tex_node.location = -459, 135
+    color_tex_node.image = bpy.data.images.load(filepath=full_tex_path, check_existing=True)
 
-        texture_node.location = -400, 0
+    node_tree.links.new(color_tex_node.outputs["Color"], principled_bsdf_node.inputs["Base Color"])
+    node_tree.links.new(principled_bsdf_node.outputs["BSDF"], material_output_node.inputs["Surface"])
 
-        node_tree.links.new(bsdf_node.inputs['Base Color'], texture_node.outputs['Color'])
+    if create_normal:
+        bump_tex_node = nodes.new(type="ShaderNodeTexImage")
+        bump_tex_node.location = -837, -249
+        bump_tex_node.image = bpy.data.images.load(filepath=full_tex_path_bump, check_existing=True)
+
+        separate_rgb_node = nodes.new(type="ShaderNodeSeparateRGB")
+        separate_rgb_node.location = -281, -256
+
+        combine_rgb_node = nodes.new(type="ShaderNodeCombineRGB")
+        combine_rgb_node.location = -102, -447
+
+        normal_map_node = nodes.new(type="ShaderNodeNormalMap")
+        normal_map_node.location = 89, -429
+
+        invert_node = nodes.new(type="ShaderNodeInvert")
+        invert_node.location = -88, -304
+
+        node_tree.links.new(bump_tex_node.outputs["Color"], separate_rgb_node.inputs["Image"])
+        node_tree.links.new(bump_tex_node.outputs["Alpha"], combine_rgb_node.inputs["G"])
+        node_tree.links.new(separate_rgb_node.outputs["R"], principled_bsdf_node.inputs["Specular"])
+        node_tree.links.new(separate_rgb_node.outputs["G"], combine_rgb_node.inputs["B"])
+        node_tree.links.new(separate_rgb_node.outputs["B"], combine_rgb_node.inputs["R"])
+        node_tree.links.new(combine_rgb_node.outputs["Image"], normal_map_node.inputs["Color"])
+        node_tree.links.new(normal_map_node.outputs["Normal"], principled_bsdf_node.inputs["Normal"])
+
+        node_tree.links.new(separate_rgb_node.outputs["R"], invert_node.inputs["Color"])
+        node_tree.links.new(invert_node.outputs["Color"], principled_bsdf_node.inputs["Roughness"])
 
 
 def _import_main(fpath, context, creader):
@@ -662,8 +697,6 @@ def _import_main(fpath, context, creader):
                     bpy_material.xray.cshader = cshader
                     bpy_material.xray.gamemtl = gamemtl
                     if texture:
-                        # TODO creage texture to material assignment
-                        bpy_texture = bpy.data.textures.get(texture)
                         create_bdsf_nodes_setup(bpy_material, texture)
 
                 context.loaded_materials[name] = bpy_material
