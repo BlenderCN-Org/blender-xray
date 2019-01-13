@@ -311,7 +311,7 @@ def _import_mesh(context, creader, renamemap):
     if mesh_options is not None:
         bo_mesh.data.xray.options = mesh_options
     for vgroup in vgroups:
-        bo_mesh.vertex_groups.new(vgroup)
+        bo_mesh.vertex_groups.new(name=vgroup)
 
     f_facez = []
     images = []
@@ -411,7 +411,7 @@ def _get_real_bone_shape():
     result = bpy.data.objects.get('real_bone_shape')
     if result is None:
         result = bpy.data.objects.new('real_bone_shape', None)
-        result.empty_draw_type = 'SPHERE'
+        result.empty_display_type = 'SPHERE'
     return result
 
 
@@ -428,11 +428,11 @@ def _create_bone(context, bpy_arm_obj, name, parent, vmap, offset, rotate, lengt
     try:
         bpy_bone = bpy_armature.edit_bones.new(name=name)
         rot = mathutils.Euler((-rotate[0], -rotate[1], -rotate[2]), 'YXZ').to_matrix().to_4x4()
-        mat = mathutils.Matrix.Translation(offset) * rot * MATRIX_BONE
+        mat = mathutils.Matrix.Translation(offset) @ rot @ MATRIX_BONE
         if parent:
             bpy_bone.parent = bpy_armature.edit_bones.get(parent, None)
             if bpy_bone.parent:
-                mat = bpy_bone.parent.matrix * MATRIX_BONE_INVERTED * mat
+                mat = bpy_bone.parent.matrix @ MATRIX_BONE_INVERTED @ mat
             else:
                 log.warn('bone parent isn\'t found', bone=name, parent=parent)
         bpy_bone.tail.y = 0.02
@@ -709,11 +709,11 @@ def _import_main(fpath, context, creader):
             if bpy and (bpy_arm_obj is None):
                 bpy_armature = bpy.data.armatures.new(object_name)
                 bpy_armature.use_auto_ik = True
-                bpy_armature.draw_type = 'STICK'
+                bpy_armature.display_type = 'STICK'
                 bpy_arm_obj = bpy.data.objects.new(object_name, bpy_armature)
-                bpy_arm_obj.show_x_ray = True
+                bpy_arm_obj.show_in_front = True
                 bpy.context.scene.collection.objects.link(bpy_arm_obj)
-                bpy.context.scene.objects.active = bpy_arm_obj
+                bpy.context.view_layer.objects.active = bpy_arm_obj
             if cid == Chunks.Object.BONES:
                 for _ in range(bones_count):
                     name, parent, vmap = reader.gets(), reader.gets(), reader.gets()
@@ -757,7 +757,7 @@ def _import_main(fpath, context, creader):
             for bone in bpy_arm_obj.pose.bones:
                 bone.rotation_mode = 'ZXY'
         elif (cid == Chunks.Object.PARTITIONS0) or (cid == Chunks.Object.PARTITIONS1):
-            bpy.context.scene.objects.active = bpy_arm_obj
+            bpy.context.view_layer.objects.active = bpy_arm_obj
             bpy.ops.object.mode_set(mode='POSE')
             try:
                 reader = PackedReader(data)
@@ -820,8 +820,8 @@ def _import_main(fpath, context, creader):
             reader = PackedReader(data)
             pos = read_v3f(reader)
             rot = read_v3f(reader)
-            bpy_obj.matrix_basis *= mathutils.Matrix.Translation(pos) \
-                                    * mathutils.Euler(rot, 'YXZ').to_matrix().to_4x4()
+            bpy_obj.matrix_basis @= mathutils.Matrix.Translation(pos) \
+                                    @ mathutils.Euler(rot, 'YXZ').to_matrix().to_4x4()
         elif cid == Chunks.Object.FLAGS:
             length_data = len(data)
             if length_data == 4:

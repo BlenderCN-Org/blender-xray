@@ -24,8 +24,8 @@ class AbstractHelper:
         helper = self.get_helper()
         if helper is None:
             helper = self._create_helper(self._name)
-            helper.draw_type = 'WIRE'
-            helper.show_x_ray = True
+            helper.display_type = 'WIRE'
+            helper.show_in_front = True
             helper.hide_render = True
             bpy.context.scene.collection.objects.link(helper)
 
@@ -63,7 +63,7 @@ class AbstractHelper:
 
     @staticmethod
     def _select_object(_object):
-        bpy.context.scene.objects.active = _object
+        bpy.context.view_layer.objects.active = _object
         for obj in bpy.context.selectable_objects:
             obj.select = obj == _object
 

@@ -33,7 +33,7 @@ def _import(fpath, creader, context):
                 bpy_cam.rotation_euler = (math.pi / 2, 0, 0)
                 bpy.context.scene.collection.objects.link(bpy_cam)
             else:
-                bpy_obj.empty_draw_type = 'SPHERE'
+                bpy_obj.empty_display_type = 'SPHERE'
             bpy_obj.empty_draw_size = 0.5
             bpy.context.scene.collection.objects.link(bpy_obj)
             action = bpy.data.actions.new(name=name)

@@ -29,7 +29,7 @@ class CreateFakeBones(BaseOperator):
 
                 fake_bone = armature.edit_bones.new(name=utils.build_fake_bone_name(bone.name))
                 fake_bone.use_deform = False
-                fake_bone.hide = True
+                fake_bone.hide_viewport = True
                 fake_bone.parent = parent
                 fake_bone.use_connect = True
                 fake_bone.tail = bone.head
@@ -43,7 +43,7 @@ class CreateFakeBones(BaseOperator):
                 pbone.lock_ik_x = pbone.lock_ik_y = pbone.lock_ik_z = True
 
                 bone = armature.bones[name]
-                bone.hide = True
+                bone.hide_viewport = True
 
         self.report({'INFO'}, 'Created %d fake bones' % len(fake_names))
         return {'FINISHED'}
@@ -92,7 +92,7 @@ class ToggleFakeBonesVisibility(BaseOperator):
         ]
         hide = any((not bone.hide for bone in bones))
         for bone in bones:
-            bone.hide = hide
+            bone.hide_viewport = hide
 
         return {'FINISHED'}
 

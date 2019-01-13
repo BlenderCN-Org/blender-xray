@@ -401,7 +401,7 @@ class XRayBoneProperties(bpy.types.PropertyGroup):
     mass: bpy.props.PointerProperty(type=MassProperties)
 
     def ondraw_postview(self, obj_arm, bone):
-        if obj_arm.hide or not obj_arm.data.xray.display_bone_shapes or not bone.xray.exportable:
+        if obj_arm.hide_viewport or not obj_arm.data.xray.display_bone_shapes or not bone.xray.exportable:
             return
 
         if not obj_arm.name in bpy.context.scene.objects:

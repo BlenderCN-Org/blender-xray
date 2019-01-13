@@ -26,7 +26,7 @@ def read_header(packed_reader):
 def read_details_meshes(fpath, base_name, context, chunked_reader, color_indices, header):
 
     bpy_obj_root = bpy.data.objects.new('{} meshes'.format(base_name), None)
-    bpy_obj_root.empty_draw_type = 'SPHERE'
+    bpy_obj_root.empty_display_type = 'SPHERE'
     bpy.context.scene.collection.objects.link(bpy_obj_root)
 
     step_x = 0.5

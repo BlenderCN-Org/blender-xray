@@ -147,7 +147,7 @@ class _ApplyShape(bpy.types.Operator):
         xsh.set_curver()
         for obj in bpy.data.objects:
             if obj.data == bone.id_data:
-                bpy.context.scene.objects.active = obj
+                bpy.context.view_layer.objects.active = obj
                 break
         HELPER.deactivate()
         bpy.context.scene.update()
